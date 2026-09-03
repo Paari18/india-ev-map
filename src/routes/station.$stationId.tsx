@@ -21,7 +21,6 @@ export const Route = createFileRoute("/station/$stationId")({
         content: loaderData
           ? `${loaderData.name} by ${loaderData.network} in ${loaderData.city}: ${loaderData.connectors.join(", ")} up to ${loaderData.maxPowerKw}kW at ₹${loaderData.pricePerKwh}/kWh.`
           : "This charging station is unavailable.",
-        ...(loaderData ? {} : { }),
       },
       ...(loaderData
         ? [
