@@ -5,9 +5,9 @@ import { StationCard } from "../components/StationCard";
 import { cities, stations } from "../data/stations";
 
 type StationSearch = {
-  city: string | undefined;
-  connector: string | undefined;
-  power: string | undefined;
+  city?: string | undefined;
+  connector?: string | undefined;
+  power?: string | undefined;
 };
 
 export const Route = createFileRoute("/stations")({
