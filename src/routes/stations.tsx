@@ -5,16 +5,16 @@ import { StationCard } from "../components/StationCard";
 import { cities, stations } from "../data/stations";
 
 type StationSearch = {
-  city?: string;
-  connector?: string;
-  power?: string;
+  city: string | undefined;
+  connector: string | undefined;
+  power: string | undefined;
 };
 
 export const Route = createFileRoute("/stations")({
   validateSearch: (search: Record<string, unknown>): StationSearch => ({
-    city: typeof search.city === "string" ? search.city : undefined,
-    connector: typeof search.connector === "string" ? search.connector : undefined,
-    power: typeof search.power === "string" ? search.power : undefined,
+    city: typeof search["city"] === "string" ? search["city"] : undefined,
+    connector: typeof search["connector"] === "string" ? search["connector"] : undefined,
+    power: typeof search["power"] === "string" ? search["power"] : undefined,
   }),
   head: () => ({
     meta: [

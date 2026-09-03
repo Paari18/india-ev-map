@@ -10,7 +10,7 @@ const toneClasses: Record<string, { dot: string; text: string }> = {
 
 export function StationCard({ station }: { station: Station }) {
   const meta = statusMeta[station.status];
-  const tone = toneClasses[meta.tone];
+  const tone = toneClasses[meta.tone]!;
 
   return (
     <Link

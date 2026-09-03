@@ -66,8 +66,8 @@ function StationDetailPage() {
         <div className="mt-6 grid lg:grid-cols-[1fr_360px] gap-8">
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <div className={`inline-flex items-center gap-2 text-sm font-semibold ${toneDot[meta.tone].split(" ")[1]}`}>
-                <span className={`size-2 rounded-full ${toneDot[meta.tone].split(" ")[0]}`} />
+              <div className={`inline-flex items-center gap-2 text-sm font-semibold ${toneDot[meta.tone]!.split(" ")[1]}`}>
+                <span className={`size-2 rounded-full ${toneDot[meta.tone]!.split(" ")[0]}`} />
                 {meta.label}
               </div>
               <span className="text-sm text-frost/50">{station.network}</span>
