@@ -14,7 +14,7 @@ export function StationCard({ station }: { station: Station }) {
 
   return (
     <Link
-      to="/stations/$stationId"
+      to="/station/$stationId"
       params={{ stationId: station.id }}
       className="group block glass-panel-subtle backdrop-blur-md rounded-2xl p-5 hover:border-accent/40 transition"
     >
