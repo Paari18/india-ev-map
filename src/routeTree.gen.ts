@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MapRouteImport } from './routes/map'
 import { Route as StationsRouteImport } from './routes/stations'
 import { Route as StationStationIdRouteImport } from './routes/station.$stationId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapRoute = MapRouteImport.update({
+  id: '/map',
+  path: '/map',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StationsRoute = StationsRouteImport.update({
@@ -31,30 +37,34 @@ const StationStationIdRoute = StationStationIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/map': typeof MapRoute
   '/stations': typeof StationsRoute
   '/station/$stationId': typeof StationStationIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/map': typeof MapRoute
   '/stations': typeof StationsRoute
   '/station/$stationId': typeof StationStationIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/map': typeof MapRoute
   '/stations': typeof StationsRoute
   '/station/$stationId': typeof StationStationIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/stations' | '/station/$stationId'
+  fullPaths: '/' | '/map' | '/stations' | '/station/$stationId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/stations' | '/station/$stationId'
-  id: '__root__' | '/' | '/stations' | '/station/$stationId'
+  to: '/' | '/map' | '/stations' | '/station/$stationId'
+  id: '__root__' | '/' | '/map' | '/stations' | '/station/$stationId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  MapRoute: typeof MapRoute
   StationsRoute: typeof StationsRoute
   StationStationIdRoute: typeof StationStationIdRoute
 }
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stations': {
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  MapRoute: MapRoute,
   StationsRoute: StationsRoute,
   StationStationIdRoute: StationStationIdRoute,
 }

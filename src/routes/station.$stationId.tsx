@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { SiteChrome } from "../components/SiteChrome";
 import { StationCard } from "../components/StationCard";
+import { IndiaEvMap } from "../components/IndiaEvMap";
 import { stations, statusMeta } from "../data/stations";
 
 export const Route = createFileRoute("/station/$stationId")({
@@ -13,8 +14,8 @@ export const Route = createFileRoute("/station/$stationId")({
     meta: [
       {
         title: loaderData
-          ? `${loaderData.name} — ${loaderData.city} EV Charging | VoltGrid`
-          : "Station unavailable | VoltGrid",
+          ? `${loaderData.name} — ${loaderData.city} EV Charging | EvFinder`
+          : "Station unavailable | EvFinder",
       },
       {
         name: "description",
@@ -53,25 +54,47 @@ function StationDetailPage() {
     .filter((s) => s.city === station.city && s.id !== station.id)
     .slice(0, 3);
 
+  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}`;
+  const osmUrl = `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=%3B${station.lat}%2C${station.lng}`;
+
   return (
     <SiteChrome>
-      <section className="px-8 lg:px-14 pt-6 pb-14">
-        <Link
-          to="/stations"
-          className="text-sm text-frost/60 hover:text-accent transition"
-        >
-          ← All stations
-        </Link>
+      <section className="px-6 sm:px-8 lg:px-14 pt-6 pb-14">
+        <div className="flex items-center justify-between">
+          <Link
+            to="/stations"
+            className="text-sm text-frost/60 hover:text-accent transition flex items-center gap-1.5"
+          >
+            <span>←</span> Back to all stations
+          </Link>
+          <Link
+            to="/map"
+            search={{ city: station.city, stationId: station.id }}
+            className="text-xs font-semibold text-accent hover:underline flex items-center gap-1"
+          >
+            🗺️ View on Live Map
+          </Link>
+        </div>
 
-        <div className="mt-6 grid lg:grid-cols-[1fr_360px] gap-8">
+        <div className="mt-6 grid lg:grid-cols-[1fr_360px] gap-8 items-start">
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <div className={`inline-flex items-center gap-2 text-sm font-semibold ${toneDot[meta.tone]!.split(" ")[1]}`}>
-                <span className={`size-2 rounded-full ${toneDot[meta.tone]!.split(" ")[0]}`} />
+              <div
+                className={`inline-flex items-center gap-2 text-sm font-semibold ${
+                  toneDot[meta.tone]!.split(" ")[1]
+                }`}
+              >
+                <span
+                  className={`size-2 rounded-full ${toneDot[meta.tone]!.split(" ")[0]}`}
+                />
                 {meta.label}
               </div>
               <span className="text-sm text-frost/50">{station.network}</span>
+              <span className="text-xs text-frost/40">
+                GPS: {station.lat.toFixed(4)}, {station.lng.toFixed(4)}
+              </span>
             </div>
+
             <h1 className="mt-3 font-display text-4xl lg:text-6xl font-black tracking-tight">
               {station.name}
             </h1>
@@ -79,29 +102,24 @@ function StationDetailPage() {
               {station.address}, {station.city}, {station.state} {station.pincode}
             </p>
 
+            {/* Metrics cards */}
             <div className="mt-8 grid sm:grid-cols-3 gap-4">
               <div className="rounded-2xl glass-panel-subtle p-5">
-                <p className="text-[11px] uppercase tracking-wider text-frost/50">
-                  Ports free
-                </p>
+                <p className="text-[11px] uppercase tracking-wider text-frost/50">Ports free</p>
                 <p className="mt-1 font-display text-3xl font-extrabold">
                   <span className="text-accent">{station.freePorts}</span>
                   <span className="text-frost/40"> / {station.totalPorts}</span>
                 </p>
               </div>
               <div className="rounded-2xl glass-panel-subtle p-5">
-                <p className="text-[11px] uppercase tracking-wider text-frost/50">
-                  Max power
-                </p>
+                <p className="text-[11px] uppercase tracking-wider text-frost/50">Max power</p>
                 <p className="mt-1 font-display text-3xl font-extrabold">
                   {station.maxPowerKw}
                   <span className="text-lg text-frost/40"> kW</span>
                 </p>
               </div>
               <div className="rounded-2xl glass-panel-subtle p-5">
-                <p className="text-[11px] uppercase tracking-wider text-frost/50">
-                  Price
-                </p>
+                <p className="text-[11px] uppercase tracking-wider text-frost/50">Price</p>
                 <p className="mt-1 font-display text-3xl font-extrabold">
                   ₹{station.pricePerKwh.toFixed(1)}
                   <span className="text-lg text-frost/40"> /kWh</span>
@@ -109,15 +127,16 @@ function StationDetailPage() {
               </div>
             </div>
 
+            {/* Connectors & Amenities */}
             <div className="mt-8 rounded-2xl glass-panel p-6">
               <h2 className="font-display text-xl font-bold">Connectors</h2>
               <div className="mt-4 flex flex-wrap gap-2">
                 {station.connectors.map((c) => (
                   <span
                     key={c}
-                    className="rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 text-sm text-accent"
+                    className="rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 text-sm text-accent font-semibold"
                   >
-                    {c}
+                    ⚡ {c}
                   </span>
                 ))}
               </div>
@@ -133,43 +152,86 @@ function StationDetailPage() {
                 ))}
               </div>
             </div>
+
+            {/* Interactive Location Map Box */}
+            <div className="mt-8 rounded-2xl glass-panel p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="font-display text-xl font-bold">Location & OpenStreetMap</h2>
+                  <p className="text-xs text-frost/60 mt-0.5">
+                    Precise GPS coordinates: {station.lat}, {station.lng}
+                  </p>
+                </div>
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-xl border border-border bg-ink2/70 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-ink2 transition"
+                >
+                  Open in Google Maps ↗
+                </a>
+              </div>
+
+              <div className="h-[340px] rounded-xl overflow-hidden border border-border">
+                <IndiaEvMap
+                  stations={[station, ...nearby]}
+                  selectedStationId={station.id}
+                  initialCenter={[station.lat, station.lng]}
+                  initialZoom={14}
+                  height="100%"
+                  showControls={true}
+                  showCitySelector={false}
+                  showLayerSelector={true}
+                  showRangeOverlay={false}
+                  enableLocateMe={true}
+                  singleStationMode={true}
+                />
+              </div>
+            </div>
           </div>
 
+          {/* Sticky Sidebar */}
           <aside className="h-fit lg:sticky lg:top-6 rounded-2xl glass-panel p-6 space-y-5">
             <div>
-              <p className="text-[11px] uppercase tracking-wider text-frost/50">
-                Hours
-              </p>
+              <p className="text-[11px] uppercase tracking-wider text-frost/50">Hours</p>
               <p className="mt-1 font-medium">{station.hours}</p>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-wider text-frost/50">
-                Driver rating
-              </p>
+              <p className="text-[11px] uppercase tracking-wider text-frost/50">Driver rating</p>
               <p className="mt-1 font-medium">
                 ★ {station.rating.toFixed(1)}{" "}
                 <span className="text-frost/50">({station.reviews} reviews)</span>
               </p>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-wider text-frost/50">
-                Payment
-              </p>
-              <p className="mt-1 font-medium">UPI · Card · In-app wallet</p>
+              <p className="text-[11px] uppercase tracking-wider text-frost/50">Payment</p>
+              <p className="mt-1 font-medium">UPI · FastTag · Card · In-app wallet</p>
             </div>
-            <button className="w-full rounded-xl charge-button px-4 py-3 font-display font-bold hover:opacity-95 transition">
-              Start navigation
-            </button>
-            <button className="w-full rounded-xl border border-border px-4 py-3 font-semibold text-foreground hover:bg-foreground/5 transition">
-              Save station
-            </button>
+
+            <a
+              href={googleMapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full text-center rounded-xl charge-button px-4 py-3 font-display font-bold hover:opacity-95 transition shadow-lg"
+            >
+              Start GPS Navigation ↗
+            </a>
+
+            <Link
+              to="/map"
+              search={{ city: station.city, stationId: station.id }}
+              className="block w-full text-center rounded-xl border border-border bg-ink2/80 px-4 py-3 font-semibold text-foreground hover:bg-foreground/5 transition"
+            >
+              View on Fullscreen Live Map
+            </Link>
           </aside>
         </div>
 
+        {/* Nearby stations */}
         {nearby.length > 0 && (
           <div className="mt-14">
             <h2 className="font-display text-2xl font-extrabold tracking-tight mb-5">
-              More in {station.city}
+              More stations in {station.city}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {nearby.map((s) => (
